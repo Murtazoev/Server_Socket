@@ -10,51 +10,54 @@ namespace Server_Socket
 {
     internal class Server
     {
-        static Socket server;
-        static Socket client;
-        static IPEndPoint ipEND = new IPEndPoint(0 , 1234);
-        static Client newClient;
+        Socket server;
+        IPEndPoint ipEND = new IPEndPoint(0 , 1234);
         List<Client> clients;
-        public void Start()
+        public async void Start()
         {
             server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             server.Bind(ipEND);
             server.Listen(1000);
             Console.WriteLine("Server Started !");
+            clients = new List<Client>();
         }
 
         public async void AcceptCalls()
         {
-            Client newClient;
-            newClient = new Client();
-            await server.AcceptAsync(newClient.socket);
-            if (newClient.socket == null)
+            Socket newSocket = await server.AcceptAsync();
+            salom aleykum 
+            
+            if(newSocket == null) {
                 return;
-            Console.WriteLine("Connected !");
-            newClient.GetNewID();
+            }
+            Console.WriteLine("Accepted socket");
+            Client newClient = new Client(newSocket);
             clients.Add(newClient);
-            Console.WriteLine("Client " + newClient.Id + " : Connected !");
+            Console.WriteLine(newClient.Id);
         }
-        public void Greeting()
-        {
 
-        }
         public void Update()
         {
             AcceptCalls();
-            if (clients != null)
-                ReceiveMessages();
+            ReceiveMessages();
         }
 
         private async void ReceiveMessages()
         {
-            foreach (Client i in clients)
+            if (clients.Count == 0)
+                return;
+            foreach (Client client in clients)
             {
+                /*
+                if (i.socket == null)
+                    continue;
+                */
                 byte[] buffer = new byte[1024];
-                await i.socket.ReceiveAsync(buffer);
+                await client.socket.ReceiveAsync(buffer);
+                Console.WriteLine("Client id"  + client.Id);
                 string messageReceived = Encoding.UTF8.GetString(buffer);
                 if (messageReceived != null)
-                    Console.WriteLine("Client " + i.Id + ": " + messageReceived);
+                    Console.WriteLine("Client " + client.Id + ": " + messageReceived + " " + clients.Count);
             }
         }
     }

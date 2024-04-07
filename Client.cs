@@ -14,9 +14,14 @@ namespace Server_Socket
         public int Id;
         public Socket socket;
 
-        private int newID = 0;
-        public void GetNewID()
-        {
+        private static int newID = 0;
+
+        public Client(Socket newSocket){
+            this.socket = newSocket;
+            GetNewID();
+        }
+
+        public void GetNewID() {
             Id = newID;
             newID++;
         }
